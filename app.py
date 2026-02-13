@@ -91,12 +91,15 @@ if st.button("Run"):
         df[last_col] = df.apply(status, axis=1)
 
         st.dataframe(df)
+        csv = df.to_csv(index=False)
+
         st.download_button(
             "Download CSV",
             data=csv,
             file_name="output.csv",
             mime="text/csv"
         )
+
 
     else:
         st.warning("Please upload both files.")
