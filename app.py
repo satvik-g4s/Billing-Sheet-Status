@@ -3,19 +3,26 @@ import pandas as pd
 
 st.set_page_config(layout="wide")
 
-uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
+col1, col2 = st.columns(2)
+
+with col1:
+    uploaded_file = st.file_uploader("Upload Current Month Billing (CSV)", type=["csv"])
+
+with col2:
+    uploaded_file_2 = st.file_uploader(""Upload Hub Branch Mapping (CSV)", type=["csv"])
 
 run = st.button("Run")
 
 if run:
-    if uploaded_file is not None:
+    if uploaded_file is not None and uploaded_file_2 is not None:
+
         df = pd.read_csv(
             uploaded_file,
             usecols=["Order_No", "cust_no", "cust_name", "invoice_dt", "Period_To"]
         )
 
         bfl = pd.read_csv(
-            uploaded_file,
+            uploaded_file_2,
             usecols=["Cust_No", "branch_finance_lead"]
         )
 
@@ -86,5 +93,14 @@ if run:
 
         st.dataframe(pivot)
 
+        csv = pivot.to_csv(index=False).encode("utf-8")
+
+        st.download_button(
+            "Download Output",
+            data=csv,
+            file_name="output.csv",
+            mime="text/csv"
+        )
+
     else:
-        st.warning("Please upload a file.")
+        st.warning("Please upload both files.")
