@@ -3,103 +3,88 @@ import pandas as pd
 
 st.set_page_config(layout="wide")
 
-uploaded_file = st.file_uploader(
-    "Upload Current Month Billing (CSV)",
-    type=["csv"],
-    key="file1"
-)
+uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
-uploaded_file2 = st.file_uploader(
-    "Upload Hub Branch Mapping (CSV)",
-    type=["csv"],
-    key="file2"
-)
+run = st.button("Run")
 
-if st.button("Run"):
-    if uploaded_file is not None and uploaded_file2 is not None:
-
+if run:
+    if uploaded_file is not None:
         df = pd.read_csv(
             uploaded_file,
-            index_col=False,
-            usecols=["Order_No","cust_no","cust_name","invoice_dt","Period_To"]
+            usecols=["Order_No", "cust_no", "cust_name", "invoice_dt", "Period_To"]
         )
 
         bfl = pd.read_csv(
-            uploaded_file2,
-            usecols=["Cust_No","branch_finance_lead"]
+            uploaded_file,
+            usecols=["Cust_No", "branch_finance_lead"]
         )
 
         df["invoice_dt"] = pd.to_datetime(df["invoice_dt"])
         df["Period_To"] = pd.to_datetime(df["Period_To"])
 
-        df["invoice_dt"] = df["invoice_dt"].dt.strftime('%b %Y')
-        df["Period_To"] = df["Period_To"].dt.strftime('%b %Y')
-
-        df = df[["Order_No","cust_no","cust_name","invoice_dt","Period_To"]]
+        df = df[df["invoice_dt"].dt.year == 2026]
 
         df = df[
-            pd.to_datetime(df["invoice_dt"], format='%b %Y').dt.year == 2026
+            ((df["invoice_dt"].dt.month - df["Period_To"].dt.month) == 1) |
+            ((df["invoice_dt"].dt.month == 1) & (df["Period_To"].dt.month == 12))
         ]
 
-        df = df[
-            (
-                (pd.to_datetime(df["invoice_dt"], format='%b %Y').dt.month -
-                 pd.to_datetime(df["Period_To"], format='%b %Y').dt.month) == 1
-            ) |
-            (
-                (pd.to_datetime(df["invoice_dt"], format='%b %Y').dt.month == 1) &
-                (pd.to_datetime(df["Period_To"], format='%b %Y').dt.month == 12)
+        df = df[df["Period_To"] >= "2025-12-01"]
+
+        count_df = (
+            df.groupby(
+                ["cust_no", "cust_name", "Order_No", "Period_To"]
             )
-        ]
+            .size()
+            .reset_index(name="Count")
+        )
 
-        df = pd.merge(
-            df,
+        count_df["Period_To"] = count_df["Period_To"].dt.strftime("%b %Y")
+
+        pivot = (
+            count_df.pivot_table(
+                index=["cust_no", "cust_name", "Order_No"],
+                columns="Period_To",
+                values="Count",
+                fill_value=0
+            )
+            .reset_index()
+        )
+
+        bfl = bfl.drop_duplicates("Cust_No")
+
+        pivot = pivot.merge(
             bfl,
             left_on="cust_no",
             right_on="Cust_No",
             how="left"
-        )
-
-        df = df.drop(columns=["Cust_No"])
-
-        temp = df.groupby(["Order_No","Period_To"]).size().unstack(fill_value=0)
-
-        df = df.merge(temp, on="Order_No", how="left")
-
-        df = df.drop_duplicates(subset=["Order_No"])
-
-        df = df.drop(columns=["invoice_dt","Period_To"])
+        ).drop(columns=["Cust_No"])
 
         month_cols = sorted(
-            df.columns[4:],
+            [col for col in pivot.columns if col not in 
+             ["cust_no", "cust_name", "Order_No", "branch_finance_lead"]],
             key=lambda x: pd.to_datetime(x, format="%b %Y")
         )
 
-        df = df[["cust_no","cust_name","Order_No","branch_finance_lead"] + month_cols]
+        pivot = pivot[
+            ["cust_no", "cust_name", "Order_No", "branch_finance_lead"] + month_cols
+        ]
 
-        last_col = month_cols[-1]
-        second_last_col = month_cols[-2]
+        if len(month_cols) >= 2:
+            last_col = month_cols[-1]
+            second_last_col = month_cols[-2]
 
-        def status(row):
-            if (row[last_col] == 0) and (row[second_last_col] != 0):
-                return "Removed"
-            elif (row[last_col] != 0) and (row[second_last_col] == 0):
-                return "Added"
-            else:
-                return row[last_col]
+            def status(row):
+                if row[last_col] == 0 and row[second_last_col] != 0:
+                    return "Removed"
+                elif row[last_col] != 0 and row[second_last_col] == 0:
+                    return "Added"
+                else:
+                    return ""
 
-        df[last_col] = df.apply(status, axis=1)
+            pivot["Status"] = pivot.apply(status, axis=1)
 
-        st.dataframe(df)
-        csv = df.to_csv(index=False)
-
-        st.download_button(
-            "Download CSV",
-            data=csv,
-            file_name="output.csv",
-            mime="text/csv"
-        )
-
+        st.dataframe(pivot)
 
     else:
-        st.warning("Please upload both files.")
+        st.warning("Please upload a file.")
