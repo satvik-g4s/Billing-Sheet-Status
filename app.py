@@ -9,7 +9,7 @@ with col1:
     uploaded_file = st.file_uploader("Upload Current Month Billing (CSV)", type=["csv"])
 
 with col2:
-    uploaded_file_2 = st.file_uploader(""Upload Hub Branch Mapping (CSV)", type=["csv"])
+    uploaded_file_2 = st.file_uploader("Upload Hub Branch Mapping (CSV)", type=["csv"])
 
 run = st.button("Run")
 
