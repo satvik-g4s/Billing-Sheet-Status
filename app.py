@@ -42,7 +42,7 @@ if run:
 
         count_df = (
             df.groupby(
-                ["cust_no", "cust_name", "Order_No", "Period_To"]
+                ["cust_no","key", "cust_name", "Order_No", "Period_To"]
             )
             .size()
             .reset_index(name="Count")
