@@ -26,10 +26,40 @@ if run:
             usecols=["Cust_No","so_locn", "branch_finance_lead"]
         )
 
-        bfl["key"]=bfl["Cust_No"].astype(str)+bfl["so_locn"].astype(str)
-        df["key"]=df["cust_no"].astype(str)+df["order_locn"].astype(str)
-        bfl["key"]=bfl["key"].str.upper()
-        df["key"]=df["key"].str.upper()
+        
+        # Clean BFL columns
+        bfl["Cust_No"] = (
+            bfl["Cust_No"]
+            .astype(str)
+            .str.strip()
+            .str.replace(".0", "", regex=False)
+        )
+        
+        bfl["so_locn"] = (
+            bfl["so_locn"]
+            .astype(str)
+            .str.strip()
+        )
+        
+        # Clean DF columns
+        df["cust_no"] = (
+            df["cust_no"]
+            .astype(str)
+            .str.strip()
+            .str.replace(".0", "", regex=False)
+        )
+        
+        df["order_locn"] = (
+            df["order_locn"]
+            .astype(str)
+            .str.strip()
+        )
+        
+        # Create keys (same format as yours)
+        bfl["key"] = (bfl["Cust_No"] + bfl["so_locn"]).str.upper()
+        df["key"] = (df["cust_no"] + df["order_locn"]).str.upper()
+
+        
         df["invoice_dt"] = pd.to_datetime(df["invoice_dt"])
         df["Period_To"] = pd.to_datetime(df["Period_To"])
 
