@@ -66,14 +66,22 @@ if run:
             how="left"
         ).drop(columns=["Cust_No"])
 
+        non_month_cols = [
+            "cust_no",
+            "key",
+            "cust_name",
+            "Order_No",
+            "so_locn",
+            "branch_finance_lead"
+        ]
+        
         month_cols = sorted(
-            [col for col in pivot.columns if col not in 
-             ["cust_no", "cust_name", "Order_No", "branch_finance_lead"]],
+            [col for col in pivot.columns if col not in non_month_cols],
             key=lambda x: pd.to_datetime(x, format="%b %Y")
         )
 
         pivot = pivot[
-            ["cust_no","key", "cust_name", "Order_No", "branch_finance_lead"] + month_cols
+            ["cust_no", "cust_name", "Order_No", "branch_finance_lead"] + month_cols
         ]
 
         if len(month_cols) >= 2:
