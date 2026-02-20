@@ -27,7 +27,7 @@ if run:
         )
 
         bfl["key"]=bfl["Cust_No"].astype(str)+bfl["so_locn"].astype(str)
-        df["key"]=df["cust_No"].astype(str)+df["order_locn"].astype(str)
+        df["key"]=df["cust_no"].astype(str)+df["order_locn"].astype(str)
         df["invoice_dt"] = pd.to_datetime(df["invoice_dt"])
         df["Period_To"] = pd.to_datetime(df["Period_To"])
 
