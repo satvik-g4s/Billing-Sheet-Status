@@ -52,15 +52,13 @@ if run:
 
         pivot = (
             count_df.pivot_table(
-                index=["cust_no", "cust_name", "Order_No"],
+                index=["cust_no","key", "cust_name", "Order_No"],
                 columns="Period_To",
                 values="Count",
                 fill_value=0
             )
             .reset_index()
         )
-
-        bfl = bfl.drop_duplicates("Cust_No")
 
         pivot = pivot.merge(
             bfl,
