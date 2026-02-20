@@ -18,14 +18,16 @@ if run:
 
         df = pd.read_csv(
             uploaded_file,
-            usecols=["Order_No", "cust_no", "cust_name", "invoice_dt", "Period_To"]
+            usecols=["Order_No", "cust_no", "cust_name", "invoice_dt", "Period_To","order_locn"]
         )
 
         bfl = pd.read_csv(
             uploaded_file_2,
-            usecols=["Cust_No", "branch_finance_lead"]
+            usecols=["Cust_No","so_locn", "branch_finance_lead"]
         )
 
+        bfl["key"]=bfl["Cust_No"]+["so_locn"]
+        df["key"]=bfl["cust_No"]+["order_locn"]
         df["invoice_dt"] = pd.to_datetime(df["invoice_dt"])
         df["Period_To"] = pd.to_datetime(df["Period_To"])
 
@@ -62,8 +64,7 @@ if run:
 
         pivot = pivot.merge(
             bfl,
-            left_on="cust_no",
-            right_on="Cust_No",
+            on="key",
             how="left"
         ).drop(columns=["Cust_No"])
 
