@@ -73,7 +73,7 @@ if run:
         )
 
         pivot = pivot[
-            ["cust_no", "cust_name", "Order_No", "branch_finance_lead"] + month_cols
+            ["cust_no","key", "cust_name", "Order_No", "branch_finance_lead"] + month_cols
         ]
 
         if len(month_cols) >= 2:
