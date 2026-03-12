@@ -40,10 +40,9 @@ if run:
                 )
         
             else:  # Excel file
-                bfl = pd.read_excel(uploaded_file_2)
+                bfl = pd.read_excel(uploaded_file_2, sheet_name=0)
 
                 bfl.columns = bfl.columns.str.strip().str.lower()
-                st.write(list(bfl.columns))
                 
                 bfl = bfl[["cust_no","so_locn","branch_finance_lead"]]
 
