@@ -44,8 +44,7 @@ if run:
                 
 
                 bfl.columns = bfl.columns.str.strip().str.lower()
-                st.write("if showing error(bfl = bfl[["cust_no","so_locn","branch_finance_lead"]]), kindly upload mapping in csv format(save as csv in excel and upload)")
-                
+                st.write('If you see an error at `bfl = bfl[["cust_no","so_locn","branch_finance_lead"]]`, please upload the mapping file in CSV format (Save As CSV in Excel and upload).')
                 bfl = bfl[["cust_no","so_locn","branch_finance_lead"]]
 
         
