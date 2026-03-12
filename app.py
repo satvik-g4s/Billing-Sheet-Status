@@ -9,22 +9,41 @@ with col1:
     uploaded_file = st.file_uploader("Upload Current Month Billing (CSV)", type=["csv"])
 
 with col2:
-    uploaded_file_2 = st.file_uploader("Upload Hub Branch Mapping (CSV)", type=["csv"])
+    uploaded_file_2 = st.file_uploader("Upload Hub Branch Mapping (CSV/Excel)", type=["csv","xlsx","xls"])
+
 
 run = st.button("Run")
 
 if run:
     if uploaded_file is not None and uploaded_file_2 is not None:
 
-        df = pd.read_csv(
-            uploaded_file,
-            usecols=["Order_No", "cust_no", "cust_name", "invoice_dt", "Period_To","order_locn"]
-        )
+        encodings = ["utf-8", "latin1", "cp1252"]
 
-        bfl = pd.read_csv(
-            uploaded_file_2,
-            usecols=["Cust_No","so_locn", "branch_finance_lead"]
-        )
+        for enc in encodings:
+            try:
+                df = pd.read_csv(
+                    uploaded_file,
+                    usecols=["Order_No", "cust_no", "cust_name", "invoice_dt", "Period_To", "order_locn"],
+                    encoding=enc
+                )
+                break
+            except UnicodeDecodeError:
+                continue
+
+        if uploaded_file_2 is not None:
+
+            if uploaded_file_2.name.endswith(".csv"):
+                bfl = pd.read_csv(
+                    uploaded_file_2,
+                    usecols=["Cust_No","so_locn","branch_finance_lead"],
+                    encoding="latin1"
+                )
+        
+            else:  # Excel file
+                bfl = pd.read_excel(
+                    uploaded_file_2,
+                    usecols=["Cust_No","so_locn","branch_finance_lead"]
+                )
 
         
         # Clean BFL columns
