@@ -40,10 +40,11 @@ if run:
                 )
         
             else:  # Excel file
-                bfl = pd.read_excel(
-                    uploaded_file_2,
-                    usecols=["Cust_No","so_locn","branch_finance_lead"]
-                )
+                bfl = pd.read_excel(uploaded_file_2)
+
+                bfl.columns = bfl.columns.str.strip().str.lower()
+                
+                bfl = bfl[["cust_no","so_locn","branch_finance_lead"]]
 
         
         # Clean BFL columns
